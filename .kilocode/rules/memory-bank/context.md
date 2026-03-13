@@ -1,87 +1,88 @@
-# Active Context: Next.js Starter Template
+# Active Context: Dump BTC - Bitcoin Prediction Tool
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**Project Status:** ✅ Complete - AI-powered Bitcoin prediction tool built with Next.js
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+The Dump BTC application is fully implemented with LSTM and Random Forest models for Bitcoin price prediction.
 
 ## Recently Completed
 
-- [x] Base Next.js 16 setup with App Router
-- [x] TypeScript configuration with strict mode
-- [x] Tailwind CSS 4 integration
-- [x] ESLint configuration
-- [x] Memory bank documentation
-- [x] Recipe system for common features
+- [x] Install dependencies: @tensorflow/tfjs, recharts, technicalindicators
+- [x] Create lib/binance.ts - Binance API client for fetching candles and market data
+- [x] Create lib/indicators.ts - Technical indicator calculations (RSI, MACD, Bollinger Bands, SMA)
+- [x] Create API routes:
+  - /api/market - Real-time BTC market data
+  - /api/indicators - Technical analysis calculations
+  - /api/predict - ML prediction pipeline with LSTM/Random Forest fallback
+- [x] Create React components:
+  - Header.tsx - Logo and branding
+  - MarketStats.tsx - Current price, 24h change, high/low range
+  - IndicatorCard.tsx - RSI, MACD, Volatility, Trend indicators
+  - PredictionChart.tsx - 5-hour prediction chart with Recharts
+  - TechnicalChart.tsx - Historical chart with SMA, BB, MACD overlays
+- [x] Create main page with all components integrated
+- [x] Style with custom CSS matching spec (dark theme, Bitcoin orange accents)
+- [x] Run typecheck and lint - all passing
 
 ## Current Structure
 
 | File/Directory | Purpose | Status |
 |----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
-| `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/globals.css` | Global styles | ✅ Ready |
-| `.kilocode/` | AI context & recipes | ✅ Ready |
+| `src/lib/binance.ts` | Binance API client | ✅ |
+| `src/lib/indicators.ts` | Technical indicators | ✅ |
+| `src/app/api/market/route.ts` | Market data API | ✅ |
+| `src/app/api/indicators/route.ts` | Indicators API | ✅ |
+| `src/app/api/predict/route.ts` | ML prediction API | ✅ |
+| `src/components/Header.tsx` | Header component | ✅ |
+| `src/components/MarketStats.tsx` | Market stats component | ✅ |
+| `src/components/IndicatorCard.tsx` | Indicator cards | ✅ |
+| `src/components/PredictionChart.tsx` | Prediction chart | ✅ |
+| `src/components/TechnicalChart.tsx` | Technical chart | ✅ |
+| `src/app/page.tsx` | Main page | ✅ |
+| `src/app/globals.css` | Custom styles | ✅ |
 
-## Current Focus
+## Tech Stack
 
-The template is ready. Next steps depend on user requirements:
+- **Framework:** Next.js 16 with App Router
+- **ML:** TensorFlow.js (LSTM neural network)
+- **Visualization:** Recharts
+- **Technical Analysis:** technicalindicators library
+- **API:** Binance public API (no auth required)
+- **Styling:** Custom CSS with CSS variables
 
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
+## Features Implemented
 
-## Quick Start Guide
-
-### To add a new page:
-
-Create a file at `src/app/[route]/page.tsx`:
-```tsx
-export default function NewPage() {
-  return <div>New page content</div>;
-}
-```
-
-### To add components:
-
-Create `src/components/` directory and add components:
-```tsx
-// src/components/ui/Button.tsx
-export function Button({ children }: { children: React.ReactNode }) {
-  return <button className="px-4 py-2 bg-blue-600 text-white rounded">{children}</button>;
-}
-```
-
-### To add a database:
-
-Follow `.kilocode/recipes/add-database.md`
-
-### To add API routes:
-
-Create `src/app/api/[route]/route.ts`:
-```tsx
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello" });
-}
-```
-
-## Available Recipes
-
-| Recipe | File | Use Case |
-|--------|------|----------|
-| Add Database | `.kilocode/recipes/add-database.md` | Data persistence with Drizzle + SQLite |
-
-## Pending Improvements
-
-- [ ] Add more recipes (auth, email, etc.)
-- [ ] Add example components
-- [ ] Add testing setup recipe
+1. **Data Fetching:** 500+ BTC/USDT candles from Binance (1h intervals)
+2. **Technical Indicators:**
+   - RSI (14-period)
+   - MACD (12, 26, 9)
+   - Bollinger Bands (20, 2)
+   - SMA (7, 25, 99)
+   - Volatility calculation
+   - Trend detection
+3. **ML Models:**
+   - LSTM neural network (TensorFlow.js)
+   - Random Forest fallback (50 trees)
+   - Auto-fallback on timeout
+4. **Visualization:**
+   - Price prediction chart
+   - Technical analysis chart with toggles
+   - MACD histogram
+   - RSI gauge
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
-| Initial | Template created with base setup |
+| Initial | Base Next.js 16 template created |
+| This session | Dump BTC tool fully implemented |
+
+## Quick Start
+
+```bash
+bun install
+bun dev
+```
+
+Open http://localhost:3000 to view the application.
