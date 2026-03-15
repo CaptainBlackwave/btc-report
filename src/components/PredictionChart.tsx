@@ -26,17 +26,27 @@ interface PredictionData {
 }
 
 import { IndicatorChartData } from '@/lib/indicators';
+import { ModelSettings, defaultModelSettings } from './ModelSettingsCard';
 
 interface PredictionChartProps {
   onPredict: () => void;
   onPredictComplete: () => void;
   isLoading: boolean;
   chartData?: IndicatorChartData[];
+  modelSettings?: ModelSettings;
+  onSettingsChange?: (settings: ModelSettings) => void;
 }
 
-export function PredictionChart({ onPredict, onPredictComplete, isLoading, chartData: externalChartData }: PredictionChartProps) {
+export function PredictionChart({ 
+  onPredict, 
+  onPredictComplete, 
+  isLoading, 
+  chartData: externalChartData,
+  modelSettings = defaultModelSettings
+}: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
+  const [trainingProgress, setTrainingProgress] = useState<{ epoch: number; total: number; loss: number } | null>(null);
 
   useEffect(() => {
     if (externalChartData && externalChartData.length > 0) {
@@ -51,8 +61,16 @@ export function PredictionChart({ onPredict, onPredictComplete, isLoading, chart
 
   const runPrediction = async () => {
     onPredict();
+    setTrainingProgress(null);
     try {
-      const res = await fetch('/api/predict');
+      const params = new URLSearchParams({
+        epochs: modelSettings.epochs.toString(),
+        batchSize: modelSettings.batchSize.toString(),
+        learningRate: modelSettings.learningRate.toString(),
+        lookback: modelSettings.lookback.toString()
+      });
+      
+      const res = await fetch(`/api/predict?${params}`);
       if (res.ok) {
         const data = await res.json();
         setPrediction(data);
@@ -105,6 +123,33 @@ export function PredictionChart({ onPredict, onPredictComplete, isLoading, chart
           )}
         </button>
       </div>
+
+      {isLoading && (
+        <div className="training-progress">
+          <div className="progress-header">
+            <span className="progress-label">Training LSTM Model...</span>
+            <span className="progress-value">
+              Epoch {trainingProgress?.epoch || 0}/{modelSettings.epochs}
+            </span>
+          </div>
+          <div className="progress-bar-container">
+            <div 
+              className="progress-bar" 
+              style={{ 
+                width: `${((trainingProgress?.epoch || 0) / modelSettings.epochs) * 100}%` 
+              }}
+            />
+          </div>
+          {trainingProgress && (
+            <div className="progress-stats">
+              <span>Model: LSTM</span>
+              <span className={`loss-value ${trainingProgress.loss < 0.01 ? 'low' : ''}`}>
+                Loss: {trainingProgress.loss.toFixed(6)}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {prediction && (
         <div className="prediction-results">

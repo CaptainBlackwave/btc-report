@@ -10,11 +10,13 @@ import { TimeframeToggle } from '@/components/TimeframeToggle';
 import { SentimentCard } from '@/components/SentimentCard';
 import { BacktestChart } from '@/components/BacktestChart';
 import { PortfolioCard } from '@/components/PortfolioCard';
+import { ModelSettingsCard, defaultModelSettings, ModelSettings } from '@/components/ModelSettingsCard';
 import { useMultiTimeframe } from '@/lib/TimeframeContext';
 
 export default function Home() {
   const [predicting, setPredicting] = useState(false);
   const [showVisualization, setShowVisualization] = useState(true);
+  const [modelSettings, setModelSettings] = useState<ModelSettings>(defaultModelSettings);
   const { activeTimeframe, timeframeData, loading: tfLoading, error: tfError } = useMultiTimeframe();
 
   const currentData = timeframeData[activeTimeframe];
@@ -53,6 +55,13 @@ export default function Home() {
                 onPredictComplete={() => setPredicting(false)}
                 isLoading={predicting}
                 chartData={currentData?.chartData}
+                modelSettings={modelSettings}
+              />
+              
+              <ModelSettingsCard 
+                settings={modelSettings}
+                onSettingsChange={setModelSettings}
+                isTraining={predicting}
               />
             </div>
 

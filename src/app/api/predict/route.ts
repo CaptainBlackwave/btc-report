@@ -5,6 +5,13 @@ import { calculateIndicators } from '@/lib/indicators';
 
 export const dynamic = 'force-dynamic';
 
+interface ModelSettings {
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
+  lookback: number;
+}
+
 interface PredictionResult {
   predictions: number[];
   confidence: number;
@@ -15,6 +22,10 @@ interface PredictionResult {
     rsi: number | null;
     volatility: number;
     trend: string;
+  };
+  trainingInfo?: {
+    epochs: number;
+    finalLoss: number;
   };
 }
 
@@ -42,9 +53,13 @@ function createSequences(data: number[], seqLength: number): { X: number[][][]; 
   return { X, y };
 }
 
-async function trainLSTM(candles: number[]): Promise<tf.LayersModel | null> {
+async function trainLSTM(
+  candles: number[], 
+  settings: ModelSettings,
+  onProgress?: (epoch: number, loss: number) => void
+): Promise<{ model: tf.LayersModel; finalLoss: number } | null> {
   const { normalized, min, max } = normalizeData(candles);
-  const seqLength = 24;
+  const seqLength = settings.lookback;
   
   if (normalized.length < seqLength + 10) {
     return null;
@@ -74,28 +89,41 @@ async function trainLSTM(candles: number[]): Promise<tf.LayersModel | null> {
   model.add(tf.layers.dense({ units: 1 }));
   
   model.compile({
-    optimizer: tf.train.adam(0.001),
+    optimizer: tf.train.adam(settings.learningRate),
     loss: 'meanSquaredError'
   });
   
   const xTensor = tf.tensor3d(XTrain);
   const yTensor = tf.tensor2d(yTrain, [yTrain.length, 1]);
   
+  let finalLoss = 0;
+  
   await model.fit(xTensor, yTensor, {
-    epochs: 10,
-    batchSize: 32,
+    epochs: settings.epochs,
+    batchSize: settings.batchSize,
     validationData: [tf.tensor3d(XVal), tf.tensor2d(yVal, [yVal.length, 1])],
-    verbose: 0
+    verbose: 0,
+    callbacks: {
+      onEpochEnd: async (epoch, logs) => {
+        finalLoss = logs?.val_loss || 0;
+        if (onProgress) {
+          onProgress(epoch + 1, finalLoss);
+        }
+        await tf.nextFrame();
+      }
+    }
   });
   
-  return model;
+  xTensor.dispose();
+  yTensor.dispose();
+  
+  return { model, finalLoss };
 }
 
-function trainRandomForest(candles: number[]): { weight: number; featureIndex: number; threshold: number }[][] {
+function trainRandomForest(candles: number[], lookback: number = 5): { weight: number; featureIndex: number; threshold: number }[][] {
   const features: number[][] = [];
   const targets: number[] = [];
   
-  const lookback = 5;
   for (let i = lookback; i < candles.length - 1; i++) {
     const feature: number[] = [];
     for (let j = 1; j <= lookback; j++) {
@@ -134,8 +162,7 @@ function trainRandomForest(candles: number[]): { weight: number; featureIndex: n
   return trees;
 }
 
-function predictWithForest(trees: { weight: number; featureIndex: number; threshold: number }[][], candles: number[]): number {
-  const lookback = 5;
+function predictWithForest(trees: { weight: number; featureIndex: number; threshold: number }[][], candles: number[], lookback: number = 5): number {
   const feature: number[] = [];
   for (let j = 1; j <= lookback; j++) {
     feature.push((candles[candles.length - 1] - candles[candles.length - j]) / candles[candles.length - j]);
@@ -160,34 +187,43 @@ function predictWithForest(trees: { weight: number; featureIndex: number; thresh
   return count > 0 ? prediction / count : 0;
 }
 
-export async function GET(): Promise<NextResponse<PredictionResult | { error: string }>> {
+export async function GET(request: Request): Promise<NextResponse<PredictionResult | { error: string }>> {
   try {
+    const { searchParams } = new URL(request.url);
+    const epochs = parseInt(searchParams.get('epochs') || '20');
+    const batchSize = parseInt(searchParams.get('batchSize') || '32');
+    const learningRate = parseFloat(searchParams.get('learningRate') || '0.001');
+    const lookback = parseInt(searchParams.get('lookback') || '24');
+    
+    const settings: ModelSettings = { epochs, batchSize, learningRate, lookback };
+    
     const candles = await fetchCandles('BTCUSDT', '1h', 500);
     const closes = candles.map(c => c.close);
     const currentPrice = closes[closes.length - 1];
     const indicators = calculateIndicators(candles);
     
-    const timeoutMs = 45000;
+    const timeoutMs = 60000;
     let modelUsed: 'lstm' | 'random-forest' = 'random-forest';
     let predictions: number[] = [];
+    let trainingInfo: PredictionResult['trainingInfo'] | undefined;
     
     try {
-      const lstmPromise = trainLSTM(closes);
+      const lstmPromise = trainLSTM(closes, settings);
       const timeoutPromise = new Promise<null>((resolve) => 
         setTimeout(() => resolve(null), timeoutMs)
       );
       
-      const model = await Promise.race([lstmPromise, timeoutPromise]);
+      const result = await Promise.race([lstmPromise, timeoutPromise]);
       
-      if (model) {
+      if (result) {
         modelUsed = 'lstm';
-        const seqLength = 24;
+        const seqLength = settings.lookback;
         const lastSeq = closes.slice(-seqLength);
         const { min, max } = normalizeData(closes);
         
         for (let i = 0; i < 5; i++) {
           const input = tf.tensor3d([lastSeq.map(v => [(v - min) / (max - min)])]);
-          const pred = model.predict(input) as tf.Tensor;
+          const pred = result.model.predict(input) as tf.Tensor;
           const predValue = (await pred.data())[0];
           const nextPrice = denormalize(predValue, min, max);
           
@@ -199,7 +235,12 @@ export async function GET(): Promise<NextResponse<PredictionResult | { error: st
           pred.dispose();
         }
         
-        model.dispose();
+        trainingInfo = {
+          epochs: settings.epochs,
+          finalLoss: result.finalLoss
+        };
+        
+        result.model.dispose();
       } else {
         throw new Error('LSTM timeout');
       }
@@ -207,11 +248,11 @@ export async function GET(): Promise<NextResponse<PredictionResult | { error: st
       console.log('LSTM failed, using Random Forest:', lstmError);
       modelUsed = 'random-forest';
       
-      const trees = trainRandomForest(closes);
+      const trees = trainRandomForest(closes, settings.lookback);
       let lastPrices = [...closes];
       
       for (let i = 0; i < 5; i++) {
-        const change = predictWithForest(trees, lastPrices);
+        const change = predictWithForest(trees, lastPrices, settings.lookback);
         const nextPrice = lastPrices[lastPrices.length - 1] * (1 + change);
         predictions.push(nextPrice);
         lastPrices.push(nextPrice);
@@ -244,7 +285,8 @@ export async function GET(): Promise<NextResponse<PredictionResult | { error: st
         rsi: indicators.rsi,
         volatility: indicators.volatility,
         trend: indicators.trend
-      }
+      },
+      trainingInfo
     });
   } catch (error) {
     console.error('Prediction error:', error);
