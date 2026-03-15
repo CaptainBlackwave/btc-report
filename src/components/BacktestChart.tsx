@@ -152,6 +152,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
               }}
               formatter={(value) => [`$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, '']}
               cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
+              isAnimationActive={false}
             />
             <Legend 
               wrapperStyle={{ paddingTop: '10px' }}
@@ -169,6 +170,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
               dot={false}
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
               name="actualPrice"
+              isAnimationActive={false}
             />
             <Line 
               type="monotone" 
@@ -179,6 +181,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
               dot={false}
               activeDot={{ r: 6, fill: '#00d4aa', stroke: '#fff', strokeWidth: 2 }}
               name="predictedPrice"
+              isAnimationActive={false}
             />
           </LineChart>
         </ResponsiveContainer>

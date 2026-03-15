@@ -45,14 +45,14 @@ export function PredictionChart({
   modelSettings = defaultModelSettings
 }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
-  const [chartData, setChartData] = useState<{ time: string; historicalPrice?: number; predictedPrice?: number }[]>([]);
+  const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
 
   useEffect(() => {
     if (externalChartData && externalChartData.length > 0) {
       const historical = externalChartData.slice(-48).map((c) => ({
         time: new Date(c.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        historicalPrice: c.close,
-        predictedPrice: undefined as number | undefined
+        price: c.close,
+        type: 'historical' as const
       }));
       setChartData(historical);
     }
@@ -73,7 +73,6 @@ export function PredictionChart({
         const data = await res.json();
         setPrediction(data);
         
-        const lastPrice = data.currentPrice;
         const now = new Date();
         const predicted: { time: string; price: number; type: 'historical' | 'predicted' }[] = [];
         
@@ -88,12 +87,7 @@ export function PredictionChart({
         
         setChartData(prev => {
           const historical = prev.slice(-24);
-          const predictedWithBoth = predicted.map(d => ({
-            time: d.time,
-            historicalPrice: undefined as number | undefined,
-            predictedPrice: d.price
-          }));
-          return [...historical, ...predictedWithBoth];
+          return [...historical, ...predicted];
         });
       }
     } catch (err) {
@@ -103,6 +97,8 @@ export function PredictionChart({
     }
   };
 
+  const historicalData = chartData.filter(d => d.type === 'historical');
+  const predictedData = chartData.filter(d => d.type === 'predicted');
   const trendColor = prediction?.trend === 'bullish' ? '#00d4aa' : prediction?.trend === 'bearish' ? '#ff4757' : '#f7931a';
 
   return (
@@ -217,34 +213,37 @@ export function PredictionChart({
                 borderRadius: '8px',
                 color: '#e8e8ed'
               }}
-              formatter={(value, name) => {
-                const label = name === 'historicalPrice' ? 'Historical' : 'Predicted';
+              formatter={(value, name, props) => {
+                const type = props.payload.type;
+                const label = type === 'historical' ? 'Historical' : 'Predicted';
                 return [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, label];
               }}
               labelFormatter={(label) => label}
               cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
+              isAnimationActive={false}
             />
             <Area 
               type="monotone" 
-              dataKey="historicalPrice" 
+              dataKey="price" 
+              data={historicalData}
               stroke="#f7931a" 
               strokeWidth={2}
               fill="url(#predGradient)"
-              connectNulls
               dot={false}
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
+              isAnimationActive={false}
             />
-            {chartData.filter(d => d.predictedPrice !== undefined).length > 0 && (
+            {predictedData.length > 0 && (
               <Line 
                 type="monotone" 
-                dataKey="predictedPrice" 
-                data={chartData}
+                dataKey="price" 
+                data={predictedData}
                 stroke={trendColor}
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
-                connectNulls
                 activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
+                isAnimationActive={false}
               />
             )}
           </ComposedChart>

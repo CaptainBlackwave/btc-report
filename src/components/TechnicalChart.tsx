@@ -135,22 +135,23 @@ export function TechnicalChart({ chartData: externalChartData }: TechnicalChartP
                   }}
                   labelStyle={{ color: '#8b8b9a' }}
                   cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  isAnimationActive={false}
                 />
                 <Legend />
 
                 {showBB && (
                   <>
-                    <Line type="monotone" dataKey="bbUpper" stroke="#ff4757" strokeWidth={1} dot={false} strokeDasharray="3 3" name="BB Upper" activeDot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="bbMiddle" stroke="#ffa502" strokeWidth={1} dot={false} name="BB Middle" activeDot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="bbLower" stroke="#00d4aa" strokeWidth={1} dot={false} strokeDasharray="3 3" name="BB Lower" activeDot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="bbUpper" stroke="#ff4757" strokeWidth={1} dot={false} strokeDasharray="3 3" name="BB Upper" activeDot={{ r: 4 }} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="bbMiddle" stroke="#ffa502" strokeWidth={1} dot={false} name="BB Middle" activeDot={{ r: 4 }} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="bbLower" stroke="#00d4aa" strokeWidth={1} dot={false} strokeDasharray="3 3" name="BB Lower" activeDot={{ r: 4 }} isAnimationActive={false} />
                   </>
                 )}
 
                 {showSMA && (
                   <>
-                    <Line type="monotone" dataKey="sma7" stroke="#00d4aa" strokeWidth={1.5} dot={false} name="SMA 7" activeDot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="sma25" stroke="#f7931a" strokeWidth={1.5} dot={false} name="SMA 25" activeDot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="sma99" stroke="#9b59b6" strokeWidth={1.5} dot={false} name="SMA 99" activeDot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="sma7" stroke="#00d4aa" strokeWidth={1.5} dot={false} name="SMA 7" activeDot={{ r: 4 }} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="sma25" stroke="#f7931a" strokeWidth={1.5} dot={false} name="SMA 25" activeDot={{ r: 4 }} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="sma99" stroke="#9b59b6" strokeWidth={1.5} dot={false} name="SMA 99" activeDot={{ r: 4 }} isAnimationActive={false} />
                   </>
                 )}
 
@@ -162,6 +163,7 @@ export function TechnicalChart({ chartData: externalChartData }: TechnicalChartP
                   dot={false} 
                   name="Price"
                   activeDot={{ r: 6, fill: '#e8e8ed', stroke: '#fff', strokeWidth: 2 }}
+                  isAnimationActive={false}
                 />
               </ComposedChart>
             </ResponsiveContainer>
