@@ -1,4 +1,4 @@
-# Dump BTC - AI-Powered Bitcoin Prediction Tool
+# BTC Report - AI-Powered Bitcoin Prediction Tool
 
 A real-time Bitcoin market analysis and price prediction dashboard built with Next.js. Features technical indicators, machine learning-based price predictions, and interactive charts.
 

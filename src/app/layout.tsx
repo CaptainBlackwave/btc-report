@@ -15,7 +15,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Dump BTC - AI Bitcoin Prediction",
+  title: "BTC Report - AI Bitcoin Prediction",
   description: "AI-powered Bitcoin price prediction using LSTM and Random Forest",
 };
 

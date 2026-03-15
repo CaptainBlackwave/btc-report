@@ -137,7 +137,7 @@ export default function Home() {
       </div>
 
       <footer className="footer">
-        <p>Dump BTC - AI-Powered Bitcoin Prediction Tool</p>
+        <p>BTC Report - AI-Powered Bitcoin Prediction Tool</p>
         <p className="disclaimer">
           Predictions are for educational purposes only. Not financial advice.
         </p>

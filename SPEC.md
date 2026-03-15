@@ -1,8 +1,8 @@
-# Dump BTC - Bitcoin Prediction Tool
+# BTC Report - Bitcoin Prediction Tool
 
 ## Project Overview
 
-**Project Name:** Dump BTC  
+**Project Name:** BTC Report  
 **Type:** AI/ML-powered cryptocurrency prediction webapp  
 **Core Functionality:** Analyze BTC market data using LSTM neural networks and Random Forest ensemble methods to generate short-term price predictions  
 **Target Users:** Crypto traders, researchers, and enthusiasts interested in AI-driven market analysis

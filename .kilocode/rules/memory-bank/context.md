@@ -1,10 +1,10 @@
-# Active Context: Dump BTC - Bitcoin Prediction Tool
+# Active Context: BTC Report - Bitcoin Prediction Tool
 
 ## Current State
 
 **Project Status:** ✅ Complete - AI-powered Bitcoin prediction tool built with Next.js
 
-The Dump BTC application is fully implemented with LSTM and Random Forest models for Bitcoin price prediction.
+The BTC Report application is fully implemented with LSTM and Random Forest models for Bitcoin price prediction.
 
 ## Recently Completed
 
@@ -76,7 +76,7 @@ The Dump BTC application is fully implemented with LSTM and Random Forest models
 | Date | Changes |
 |------|---------|
 | Initial | Base Next.js 16 template created |
-| This session | Dump BTC tool fully implemented |
+| This session | BTC Report tool fully implemented |
 
 ## Quick Start
 
