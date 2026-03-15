@@ -2,6 +2,37 @@ import { NextResponse } from 'next/server';
 import * as tf from '@tensorflow/tfjs';
 import { fetchCandles, fetchOrderBook } from '@/lib/binance';
 import { calculateIndicators } from '@/lib/indicators';
+import { detectMarketRegime, getRegimeLabel, MarketRegime } from '@/lib/regime';
+
+function getRegimeSettings(regime: MarketRegime, baseSettings: ModelSettings): ModelSettings {
+  switch (regime) {
+    case 'trending':
+      return {
+        ...baseSettings,
+        epochs: Math.floor(baseSettings.epochs * 1.2),
+        lookback: Math.floor(baseSettings.lookback * 1.5)
+      };
+    case 'mean-reverting':
+      return {
+        ...baseSettings,
+        epochs: Math.floor(baseSettings.epochs * 0.8),
+        lookback: Math.floor(baseSettings.lookback * 0.5)
+      };
+    case 'volatile':
+      return {
+        ...baseSettings,
+        epochs: Math.floor(baseSettings.epochs * 1.5),
+        batchSize: Math.floor(baseSettings.batchSize * 2)
+      };
+    case 'consolidating':
+    default:
+      return {
+        ...baseSettings,
+        epochs: Math.floor(baseSettings.epochs * 0.7),
+        lookback: Math.floor(baseSettings.lookback * 0.7)
+      };
+  }
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +49,11 @@ interface PredictionResult {
   trend: 'bullish' | 'bearish' | 'neutral';
   modelUsed: 'lstm' | 'random-forest';
   currentPrice: number;
+  regime: {
+    type: MarketRegime;
+    label: string;
+    confidence: number;
+  };
   indicators: {
     rsi: number | null;
     volatility: number;
@@ -212,10 +248,14 @@ export async function GET(request: Request): Promise<NextResponse<PredictionResu
     const currentPrice = closes[closes.length - 1];
     const indicators = calculateIndicators(candles);
     
+    const regimeData = detectMarketRegime(candles);
+    
     const orderBook = await fetchOrderBook('BTCUSDT', 20);
     const currentImbalance = orderBook.imbalance;
     
     const imbalances = closes.map(() => currentImbalance);
+    
+    const regimeSettings = getRegimeSettings(regimeData.regime, settings);
     
     const timeoutMs = 60000;
     let modelUsed: 'lstm' | 'random-forest' = 'random-forest';
@@ -223,7 +263,7 @@ export async function GET(request: Request): Promise<NextResponse<PredictionResu
     let trainingInfo: PredictionResult['trainingInfo'] | undefined;
     
     try {
-      const lstmPromise = trainLSTM(closes, imbalances, settings);
+      const lstmPromise = trainLSTM(closes, imbalances, regimeSettings);
       const timeoutPromise = new Promise<null>((resolve) => 
         setTimeout(() => resolve(null), timeoutMs)
       );
@@ -300,6 +340,11 @@ export async function GET(request: Request): Promise<NextResponse<PredictionResu
       trend,
       modelUsed,
       currentPrice,
+      regime: {
+        type: regimeData.regime,
+        label: getRegimeLabel(regimeData.regime),
+        confidence: regimeData.confidence
+      },
       indicators: {
         rsi: indicators.rsi,
         volatility: indicators.volatility,
