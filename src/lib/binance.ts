@@ -132,3 +132,52 @@ export function createLagFeatures(candles: Candle[], numLags: number = 5): numbe
   
   return features;
 }
+
+export interface OrderBookEntry {
+  price: number;
+  quantity: number;
+}
+
+export interface OrderBookData {
+  bids: OrderBookEntry[];
+  asks: OrderBookEntry[];
+  bidVolume: number;
+  askVolume: number;
+  imbalance: number;
+  timestamp: number;
+}
+
+export async function fetchOrderBook(symbol: string = 'BTCUSDT', limit: number = 20): Promise<OrderBookData> {
+  const url = `${BINANCE_API}/depth?symbol=${symbol}&limit=${limit}`;
+  
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch order book: ${response.statusText}`);
+  }
+  
+  const data = await response.json();
+  
+  const bids: OrderBookEntry[] = data.bids.map(([price, quantity]: [string, string]) => ({
+    price: parseFloat(price),
+    quantity: parseFloat(quantity)
+  }));
+  
+  const asks: OrderBookEntry[] = data.asks.map(([price, quantity]: [string, string]) => ({
+    price: parseFloat(price),
+    quantity: parseFloat(quantity)
+  }));
+  
+  const bidVolume = bids.reduce((sum, b) => sum + b.quantity * b.price, 0);
+  const askVolume = asks.reduce((sum, a) => sum + a.quantity * a.price, 0);
+  
+  const imbalance = (bidVolume - askVolume) / (bidVolume + askVolume);
+  
+  return {
+    bids,
+    asks,
+    bidVolume,
+    askVolume,
+    imbalance,
+    timestamp: Date.now()
+  };
+}

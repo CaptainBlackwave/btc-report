@@ -12,6 +12,7 @@ import { BacktestChart } from '@/components/BacktestChart';
 import { PortfolioCard } from '@/components/PortfolioCard';
 import { ModelSettingsCard, defaultModelSettings, ModelSettings } from '@/components/ModelSettingsCard';
 import { ExportButton } from '@/components/ExportButton';
+import { OrderBookPanel } from '@/components/OrderBookPanel';
 import { useMultiTimeframe } from '@/lib/TimeframeContext';
 
 export default function Home() {
@@ -153,6 +154,10 @@ export default function Home() {
 
             <div className="sentiment-section">
               <SentimentCard />
+            </div>
+
+            <div className="orderbook-section">
+              <OrderBookPanel />
             </div>
 
             <div className="visualization-toggle">

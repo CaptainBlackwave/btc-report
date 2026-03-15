@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import * as tf from '@tensorflow/tfjs';
-import { fetchCandles } from '@/lib/binance';
+import { fetchCandles, fetchOrderBook } from '@/lib/binance';
 import { calculateIndicators } from '@/lib/indicators';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +22,7 @@ interface PredictionResult {
     rsi: number | null;
     volatility: number;
     trend: string;
+    orderBookImbalance: number;
   };
   trainingInfo?: {
     epochs: number;
@@ -41,13 +42,21 @@ function denormalize(value: number, min: number, max: number): number {
   return value * (max - min) + min;
 }
 
-function createSequences(data: number[], seqLength: number): { X: number[][][]; y: number[] } {
+function createSequencesWithImbalance(
+  prices: number[], 
+  imbalances: number[],
+  seqLength: number
+): { X: number[][][]; y: number[] } {
   const X: number[][][] = [];
   const y: number[] = [];
   
-  for (let i = seqLength; i < data.length; i++) {
-    X.push(data.slice(i - seqLength, i).map(v => [v]));
-    y.push(data[i]);
+  for (let i = seqLength; i < prices.length; i++) {
+    const sequence: number[][] = [];
+    for (let j = i - seqLength; j < i; j++) {
+      sequence.push([prices[j], imbalances[j] || 0]);
+    }
+    X.push(sequence);
+    y.push(prices[i]);
   }
   
   return { X, y };
@@ -55,6 +64,7 @@ function createSequences(data: number[], seqLength: number): { X: number[][][]; 
 
 async function trainLSTM(
   candles: number[], 
+  imbalances: number[],
   settings: ModelSettings,
   onProgress?: (epoch: number, loss: number) => void
 ): Promise<{ model: tf.LayersModel; finalLoss: number } | null> {
@@ -65,7 +75,7 @@ async function trainLSTM(
     return null;
   }
   
-  const { X, y } = createSequences(normalized, seqLength);
+  const { X, y } = createSequencesWithImbalance(normalized, imbalances, seqLength);
   
   if (X.length < 50) {
     return null;
@@ -81,7 +91,7 @@ async function trainLSTM(
   model.add(tf.layers.lstm({
     units: 32,
     returnSequences: true,
-    inputShape: [seqLength, 1]
+    inputShape: [seqLength, 2]
   }));
   model.add(tf.layers.dropout({ rate: 0.2 }));
   model.add(tf.layers.lstm({ units: 16, returnSequences: false }));
@@ -202,13 +212,18 @@ export async function GET(request: Request): Promise<NextResponse<PredictionResu
     const currentPrice = closes[closes.length - 1];
     const indicators = calculateIndicators(candles);
     
+    const orderBook = await fetchOrderBook('BTCUSDT', 20);
+    const currentImbalance = orderBook.imbalance;
+    
+    const imbalances = closes.map(() => currentImbalance);
+    
     const timeoutMs = 60000;
     let modelUsed: 'lstm' | 'random-forest' = 'random-forest';
     let predictions: number[] = [];
     let trainingInfo: PredictionResult['trainingInfo'] | undefined;
     
     try {
-      const lstmPromise = trainLSTM(closes, settings);
+      const lstmPromise = trainLSTM(closes, imbalances, settings);
       const timeoutPromise = new Promise<null>((resolve) => 
         setTimeout(() => resolve(null), timeoutMs)
       );
@@ -219,10 +234,14 @@ export async function GET(request: Request): Promise<NextResponse<PredictionResu
         modelUsed = 'lstm';
         const seqLength = settings.lookback;
         const lastSeq = closes.slice(-seqLength);
+        const lastImbalances = imbalances.slice(-seqLength);
         const { min, max } = normalizeData(closes);
         
         for (let i = 0; i < 5; i++) {
-          const input = tf.tensor3d([lastSeq.map(v => [(v - min) / (max - min)])]);
+          const input = tf.tensor3d([lastSeq.map((v, j) => [
+            (v - min) / (max - min),
+            lastImbalances[j]
+          ])]);
           const pred = result.model.predict(input) as tf.Tensor;
           const predValue = (await pred.data())[0];
           const nextPrice = denormalize(predValue, min, max);
@@ -284,7 +303,8 @@ export async function GET(request: Request): Promise<NextResponse<PredictionResu
       indicators: {
         rsi: indicators.rsi,
         volatility: indicators.volatility,
-        trend: indicators.trend
+        trend: indicators.trend,
+        orderBookImbalance: currentImbalance
       },
       trainingInfo
     });
