@@ -11,6 +11,7 @@ import { SentimentCard } from '@/components/SentimentCard';
 import { BacktestChart } from '@/components/BacktestChart';
 import { PortfolioCard } from '@/components/PortfolioCard';
 import { ModelSettingsCard, defaultModelSettings, ModelSettings } from '@/components/ModelSettingsCard';
+import { ExportButton } from '@/components/ExportButton';
 import { useMultiTimeframe } from '@/lib/TimeframeContext';
 
 export default function Home() {
@@ -29,7 +30,18 @@ export default function Home() {
       <div className="container">
         <div className="timeframe-header">
           <h2 className="timeframe-label">Timeframe Analysis</h2>
-          <TimeframeToggle />
+          <div className="timeframe-controls">
+            <TimeframeToggle />
+            <ExportButton 
+              chartId="main-chart"
+              filename="btc-report"
+              title="BTC Report - Market Analysis"
+              summaryData={{
+                'Timeframe': activeTimeframe,
+                'Generated': new Date().toLocaleString()
+              }}
+            />
+          </div>
         </div>
 
         {tfError && (
@@ -38,7 +50,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="grid">
+        <div className="grid" id="main-chart">
           <div className="main-content">
             <div className="section market-section">
               <MarketStats 

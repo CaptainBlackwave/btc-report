@@ -739,6 +739,13 @@ html, body {
   gap: 16px;
 }
 
+.timeframe-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .timeframe-label {
   font-family: var(--font-mono);
   font-size: 1rem;
@@ -1806,4 +1813,59 @@ html, body {
 
 .loss-value.low {
   color: var(--accent-secondary);
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.export-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-btn.csv:hover:not(:disabled) {
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+}
+
+.export-btn.pdf:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.export-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
