@@ -7,6 +7,7 @@ import { IndicatorCard } from '@/components/IndicatorCard';
 import { PredictionChart } from '@/components/PredictionChart';
 import { TechnicalChart } from '@/components/TechnicalChart';
 import { TimeframeToggle } from '@/components/TimeframeToggle';
+import { SentimentCard } from '@/components/SentimentCard';
 import { useMultiTimeframe } from '@/lib/TimeframeContext';
 
 export default function Home() {
@@ -119,6 +120,10 @@ export default function Home() {
                   )}
                 </>
               )}
+            </div>
+
+            <div className="sentiment-section">
+              <SentimentCard />
             </div>
 
             <div className="visualization-toggle">
