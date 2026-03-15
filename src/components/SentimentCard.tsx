@@ -173,8 +173,8 @@ export function SentimentCard({ compact = false }: SentimentCardProps) {
           />
           
           <circle
-            cx={20 + (combined.score / 100) * 160 * 0.5 + 80 * Math.sin((combined.score / 100) * Math.PI)}
-            cy={100 - 80 * Math.cos((combined.score / 100) * Math.PI)}
+            cx={100 + 80 * Math.cos(Math.PI * (1 - combined.score / 100))}
+            cy={100 - 80 * Math.sin(Math.PI * (1 - combined.score / 100))}
             r="8"
             fill={sentimentColor}
             className="sentiment-gauge-dot"
