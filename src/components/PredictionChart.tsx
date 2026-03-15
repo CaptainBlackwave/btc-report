@@ -45,14 +45,14 @@ export function PredictionChart({
   modelSettings = defaultModelSettings
 }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
-  const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
+  const [chartData, setChartData] = useState<{ time: string; historicalPrice?: number; predictedPrice?: number }[]>([]);
 
   useEffect(() => {
     if (externalChartData && externalChartData.length > 0) {
       const historical = externalChartData.slice(-48).map((c) => ({
         time: new Date(c.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        price: c.close,
-        type: 'historical' as const
+        historicalPrice: c.close,
+        predictedPrice: undefined as number | undefined
       }));
       setChartData(historical);
     }
@@ -86,7 +86,15 @@ export function PredictionChart({
           });
         }
         
-        setChartData(prev => [...prev.slice(-24), ...predicted]);
+        setChartData(prev => {
+          const historical = prev.slice(-24);
+          const predictedWithBoth = predicted.map(d => ({
+            time: d.time,
+            historicalPrice: undefined as number | undefined,
+            predictedPrice: d.price
+          }));
+          return [...historical, ...predictedWithBoth];
+        });
       }
     } catch (err) {
       console.error('Prediction failed:', err);
@@ -209,30 +217,36 @@ export function PredictionChart({
                 borderRadius: '8px',
                 color: '#e8e8ed'
               }}
-              formatter={(value) => [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'Price']}
+              formatter={(value, name) => {
+                const label = name === 'historicalPrice' ? 'Historical' : 'Predicted';
+                return [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, label];
+              }}
+              labelFormatter={(label) => label}
               cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
             <Area 
               type="monotone" 
-              dataKey="price" 
+              dataKey="historicalPrice" 
               stroke="#f7931a" 
               strokeWidth={2}
               fill="url(#predGradient)"
               connectNulls
               dot={false}
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
+              isAnimationActive={false}
             />
-            {chartData.filter(d => d.type === 'predicted').length > 0 && (
+            {chartData.filter(d => d.predictedPrice !== undefined).length > 0 && (
               <Line 
                 type="monotone" 
-                dataKey="price" 
-                data={chartData.filter(d => d.type === 'predicted')}
+                dataKey="predictedPrice" 
+                data={chartData}
                 stroke={trendColor}
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
                 connectNulls
                 activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
+                isAnimationActive={false}
               />
             )}
           </ComposedChart>
