@@ -210,7 +210,7 @@ export function PredictionChart({
                 color: '#e8e8ed'
               }}
               formatter={(value) => [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'Price']}
-              isAnimationActive={false}
+              cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
             <Area 
               type="monotone" 

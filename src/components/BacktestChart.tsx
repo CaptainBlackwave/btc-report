@@ -151,7 +151,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
                 color: '#e8e8ed'
               }}
               formatter={(value) => [`$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, '']}
-              isAnimationActive={false}
+              cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
             <Legend 
               wrapperStyle={{ paddingTop: '10px' }}
