@@ -233,7 +233,6 @@ export function PredictionChart({
               connectNulls
               dot={false}
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
-              isAnimationActive={false}
             />
             {chartData.filter(d => d.predictedPrice !== undefined).length > 0 && (
               <Line 
@@ -246,7 +245,6 @@ export function PredictionChart({
                 dot={false}
                 connectNulls
                 activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
-                isAnimationActive={false}
               />
             )}
           </ComposedChart>
