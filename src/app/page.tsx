@@ -9,6 +9,7 @@ import { TechnicalChart } from '@/components/TechnicalChart';
 import { TimeframeToggle } from '@/components/TimeframeToggle';
 import { SentimentCard } from '@/components/SentimentCard';
 import { BacktestChart } from '@/components/BacktestChart';
+import { PortfolioCard } from '@/components/PortfolioCard';
 import { useMultiTimeframe } from '@/lib/TimeframeContext';
 
 export default function Home() {
@@ -43,6 +44,8 @@ export default function Home() {
                 loading={tfLoading}
               />
             </div>
+
+            <PortfolioCard />
 
             <div className="section prediction-section">
               <PredictionChart 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { MultiTimeframeProvider } from "@/lib/TimeframeContext";
+import { PortfolioProvider } from "@/lib/PortfolioContext";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
@@ -29,7 +30,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${ibmPlexSans.variable} ${jetbrainsMono.variable}`}>
         <MultiTimeframeProvider>
-          {children}
+          <PortfolioProvider>
+            {children}
+          </PortfolioProvider>
         </MultiTimeframeProvider>
       </body>
     </html>
