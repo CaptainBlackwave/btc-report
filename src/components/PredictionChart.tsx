@@ -27,10 +27,11 @@ interface PredictionData {
 
 interface PredictionChartProps {
   onPredict: () => void;
+  onPredictComplete: () => void;
   isLoading: boolean;
 }
 
-export function PredictionChart({ onPredict, isLoading }: PredictionChartProps) {
+export function PredictionChart({ onPredict, onPredictComplete, isLoading }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
 
@@ -79,6 +80,8 @@ export function PredictionChart({ onPredict, isLoading }: PredictionChartProps) 
       }
     } catch (err) {
       console.error('Prediction failed:', err);
+    } finally {
+      onPredictComplete();
     }
   };
 

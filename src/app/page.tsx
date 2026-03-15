@@ -55,6 +55,7 @@ export default function Home() {
             <div className="section prediction-section">
               <PredictionChart 
                 onPredict={() => setPredicting(true)}
+                onPredictComplete={() => setPredicting(false)}
                 isLoading={predicting}
               />
             </div>
