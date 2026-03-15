@@ -1,9 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { usePortfolio } from '@/lib/PortfolioContext';
 
+function useHydrated() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+}
+
 export function PortfolioCard() {
+  const isHydrated = useHydrated();
+  
   const { 
     portfolio, 
     currentPrice, 
@@ -65,7 +75,7 @@ export function PortfolioCard() {
     }
   };
 
-  if (portfolioLoading) {
+  if (portfolioLoading || !isHydrated) {
     return (
       <div className="portfolio-card">
         <div className="portfolio-header">
