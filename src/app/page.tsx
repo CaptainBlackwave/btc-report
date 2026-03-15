@@ -8,6 +8,7 @@ import { PredictionChart } from '@/components/PredictionChart';
 import { TechnicalChart } from '@/components/TechnicalChart';
 import { TimeframeToggle } from '@/components/TimeframeToggle';
 import { SentimentCard } from '@/components/SentimentCard';
+import { BacktestChart } from '@/components/BacktestChart';
 import { useMultiTimeframe } from '@/lib/TimeframeContext';
 
 export default function Home() {
@@ -125,6 +126,8 @@ export default function Home() {
             <div className="sentiment-section">
               <SentimentCard />
             </div>
+
+            <BacktestChart />
 
             <div className="visualization-toggle">
               <button 
