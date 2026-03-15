@@ -46,7 +46,6 @@ export function PredictionChart({
 }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
-  const [trainingProgress, setTrainingProgress] = useState<{ epoch: number; total: number; loss: number } | null>(null);
 
   useEffect(() => {
     if (externalChartData && externalChartData.length > 0) {
@@ -61,7 +60,6 @@ export function PredictionChart({
 
   const runPrediction = async () => {
     onPredict();
-    setTrainingProgress(null);
     try {
       const params = new URLSearchParams({
         epochs: modelSettings.epochs.toString(),
@@ -127,27 +125,16 @@ export function PredictionChart({
       {isLoading && (
         <div className="training-progress">
           <div className="progress-header">
-            <span className="progress-label">Training LSTM Model...</span>
-            <span className="progress-value">
-              Epoch {trainingProgress?.epoch || 0}/{modelSettings.epochs}
-            </span>
+            <span className="progress-label">Training Model...</span>
+            <span className="progress-value">{modelSettings.modelType === 'lstm' ? 'LSTM' : 'Random Forest'}</span>
           </div>
           <div className="progress-bar-container">
-            <div 
-              className="progress-bar" 
-              style={{ 
-                width: `${((trainingProgress?.epoch || 0) / modelSettings.epochs) * 100}%` 
-              }}
-            />
+            <div className="progress-bar progress-bar-indeterminate" />
           </div>
-          {trainingProgress && (
-            <div className="progress-stats">
-              <span>Model: LSTM</span>
-              <span className={`loss-value ${trainingProgress.loss < 0.01 ? 'low' : ''}`}>
-                Loss: {trainingProgress.loss.toFixed(6)}
-              </span>
-            </div>
-          )}
+          <div className="progress-stats">
+            <span>Epochs: {modelSettings.epochs}</span>
+            <span>Batch: {modelSettings.batchSize}</span>
+          </div>
         </div>
       )}
 

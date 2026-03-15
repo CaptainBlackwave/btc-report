@@ -7,6 +7,7 @@ export interface ModelSettings {
   batchSize: number;
   learningRate: number;
   lookback: number;
+  modelType: 'lstm' | 'random-forest';
 }
 
 interface ModelSettingsCardProps {
@@ -125,5 +126,6 @@ export const defaultModelSettings: ModelSettings = {
   epochs: 20,
   batchSize: 32,
   learningRate: 0.001,
-  lookback: 24
+  lookback: 24,
+  modelType: 'lstm'
 };
