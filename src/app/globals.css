@@ -1018,15 +1018,23 @@ html, body {
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--border);
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
 }
 
 .sentiment-details-toggle:hover {
   color: var(--text-primary);
-  border-color: var(--text-secondary);
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+
+.sentiment-details-toggle:active {
+  transform: scale(0.98);
 }
 
 .sentiment-sources {

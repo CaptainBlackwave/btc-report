@@ -132,12 +132,15 @@ export function SentimentCard({ compact = false }: SentimentCardProps) {
     <div className="sentiment-card">
       <div className="sentiment-header">
         <h3>Market Sentiment</h3>
-        <button 
-          className="sentiment-details-toggle"
-          onClick={() => setShowDetails(!showDetails)}
-        >
-          {showDetails ? 'Hide' : 'Show'} Details
-        </button>
+        {news && news.topHeadlines.length > 0 && (
+          <button 
+            type="button"
+            className="sentiment-details-toggle"
+            onClick={() => setShowDetails(!showDetails)}
+          >
+            {showDetails ? 'Hide' : 'Show'} Details
+          </button>
+        )}
       </div>
 
       <div className="sentiment-gauge-container">
