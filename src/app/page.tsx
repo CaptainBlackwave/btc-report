@@ -52,6 +52,10 @@ export default function Home() {
                 chartData={currentData?.chartData}
               />
             </div>
+
+            <div className="section backtest-section">
+              <BacktestChart />
+            </div>
           </div>
 
           <div className="sidebar">
@@ -126,8 +130,6 @@ export default function Home() {
             <div className="sentiment-section">
               <SentimentCard />
             </div>
-
-            <BacktestChart />
 
             <div className="visualization-toggle">
               <button 
