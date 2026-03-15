@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { MultiTimeframeProvider } from "@/lib/TimeframeContext";
@@ -19,6 +19,11 @@ const ibmPlexSans = IBM_Plex_Sans({
 export const metadata: Metadata = {
   title: "BTC Report - AI Bitcoin Prediction",
   description: "AI-powered Bitcoin price prediction using LSTM and Random Forest",
+  manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f7931a",
 };
 
 export default function RootLayout({

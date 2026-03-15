@@ -1,0 +1,22 @@
+{
+  "name": "BTC Report",
+  "short_name": "BTC Report",
+  "description": "Bitcoin prediction and analysis platform with real-time market data, technical indicators, and AI-powered price forecasting",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#f7931a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
