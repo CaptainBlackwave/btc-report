@@ -30,7 +30,7 @@ async function getFearGreed() {
 async function getNewsSentiment() {
   try {
     const response = await fetch(
-      `https://cryptopanic.com/api/developer/v2/posts/?auth_token=${CRYPTOPANIC_API_KEY}&filter=hot&public=true&kind=news`,
+      `https://cryptopanic.com/api/developer/v2/posts/?auth_token=${CRYPTOPANIC_API_KEY}&filter=hot&public=true&kind=news&currencies=BTC`,
       { next: { revalidate: 300 } }
     );
     
