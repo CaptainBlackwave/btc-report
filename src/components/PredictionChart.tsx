@@ -7,9 +7,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
-  Area,
-  ComposedChart
+  ResponsiveContainer
 } from 'recharts';
 
 interface PredictionData {
@@ -98,8 +96,6 @@ export function PredictionChart({
 
   const trendColor = prediction?.trend === 'bullish' ? '#00d4aa' : prediction?.trend === 'bearish' ? '#ff4757' : '#f7931a';
 
-  const hasPredictions = chartData.some(d => d.predictedPrice !== null);
-
   return (
     <div className="prediction-panel">
       <div className="prediction-header">
@@ -183,7 +179,7 @@ export function PredictionChart({
 
       <div className="chart-container">
         <ResponsiveContainer width="100%" height={300}>
-          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="predGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#f7931a" stopOpacity={0.3}/>
@@ -213,39 +209,34 @@ export function PredictionChart({
                 color: '#e8e8ed'
               }}
               formatter={(value, name) => {
-                if (value === null || value === undefined) return [null, null];
+                if (value === null || value === undefined) return [null, ''];
                 const label = name === 'historicalPrice' ? 'Historical' : 'Predicted';
                 return [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, label];
               }}
-              labelFormatter={(label) => label}
+              labelStyle={{ color: '#8b8b9a' }}
               cursor={{ stroke: '#f7931a', strokeWidth: 1, strokeDasharray: '4 4' }}
               isAnimationActive={false}
             />
-            <Area 
+            <Line 
               type="monotone" 
               dataKey="historicalPrice" 
               stroke="#f7931a" 
               strokeWidth={2}
-              fill="url(#predGradient)"
               dot={false}
-              connectNulls
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
               isAnimationActive={false}
             />
-            {hasPredictions && (
-              <Line 
-                type="monotone" 
-                dataKey="predictedPrice" 
-                stroke={trendColor}
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-                connectNulls
-                activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
-                isAnimationActive={false}
-              />
-            )}
-          </ComposedChart>
+            <Line 
+              type="monotone" 
+              dataKey="predictedPrice" 
+              stroke={trendColor}
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={{ r: 4, fill: trendColor }}
+              activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
+              isAnimationActive={false}
+            />
+          </LineChart>
         </ResponsiveContainer>
       </div>
 
