@@ -43,14 +43,13 @@ export function PredictionChart({
   modelSettings = defaultModelSettings
 }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
-  const [chartData, setChartData] = useState<{ time: string; historicalPrice: number | null; predictedPrice: number | null }[]>([]);
+  const [chartData, setChartData] = useState<{ time: string; historicalPrice: number; predictedPrice?: number }[]>([]);
 
   useEffect(() => {
     if (externalChartData && externalChartData.length > 0) {
       const historical = externalChartData.slice(-48).map((c) => ({
         time: new Date(c.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        historicalPrice: c.close,
-        predictedPrice: null
+        historicalPrice: c.close
       }));
       setChartData(historical);
     }
@@ -80,7 +79,7 @@ export function PredictionChart({
             const predTime = new Date(now.getTime() + (i + 1) * 60 * 60 * 1000);
             predicted.push({
               time: predTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              historicalPrice: null,
+              historicalPrice: null as unknown as number,
               predictedPrice: data.predictions[i]
             });
           }
@@ -95,6 +94,8 @@ export function PredictionChart({
   };
 
   const trendColor = prediction?.trend === 'bullish' ? '#00d4aa' : prediction?.trend === 'bearish' ? '#ff4757' : '#f7931a';
+
+  const hasPredictions = prediction !== null;
 
   return (
     <div className="prediction-panel">
@@ -223,19 +224,23 @@ export function PredictionChart({
               stroke="#f7931a" 
               strokeWidth={2}
               dot={false}
+              connectNulls
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
               isAnimationActive={false}
             />
-            <Line 
-              type="monotone" 
-              dataKey="predictedPrice" 
-              stroke={trendColor}
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={{ r: 4, fill: trendColor }}
-              activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
-              isAnimationActive={false}
-            />
+            {hasPredictions && (
+              <Line 
+                type="monotone" 
+                dataKey="predictedPrice" 
+                stroke={trendColor}
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={{ r: 4, fill: trendColor }}
+                connectNulls
+                activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
+                isAnimationActive={false}
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>
