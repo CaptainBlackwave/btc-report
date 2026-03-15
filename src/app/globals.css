@@ -741,31 +741,36 @@ html, body {
 
 .timeframe-label {
   font-family: var(--font-mono);
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-secondary);
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .timeframe-toggle {
   display: flex;
-  gap: 4px;
-  background: var(--bg-secondary);
+  gap: 2px;
+  background: var(--bg-primary);
   padding: 4px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .timeframe-btn {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 10px 18px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  position: relative;
+  letter-spacing: 0.02em;
 }
 
 .timeframe-btn:hover {
@@ -774,8 +779,14 @@ html, body {
 }
 
 .timeframe-btn.active {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, #e8850c 100%);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 16px var(--glow-orange), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.timeframe-btn.active:hover {
+  background: linear-gradient(135deg, #ffab33 0%, var(--accent-primary) 100%);
 }
 
 .timeframe-skeleton {
