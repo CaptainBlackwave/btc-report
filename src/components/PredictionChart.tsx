@@ -45,14 +45,14 @@ export function PredictionChart({
   modelSettings = defaultModelSettings
 }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
-  const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
+  const [chartData, setChartData] = useState<{ time: string; historicalPrice: number | null; predictedPrice: number | null }[]>([]);
 
   useEffect(() => {
     if (externalChartData && externalChartData.length > 0) {
       const historical = externalChartData.slice(-48).map((c) => ({
         time: new Date(c.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        price: c.close,
-        type: 'historical' as const
+        historicalPrice: c.close,
+        predictedPrice: null
       }));
       setChartData(historical);
     }
@@ -74,19 +74,18 @@ export function PredictionChart({
         setPrediction(data);
         
         const now = new Date();
-        const predicted: { time: string; price: number; type: 'historical' | 'predicted' }[] = [];
-        
-        for (let i = 0; i < 5; i++) {
-          const predTime = new Date(now.getTime() + (i + 1) * 60 * 60 * 1000);
-          predicted.push({
-            time: predTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            price: data.predictions[i],
-            type: 'predicted'
-          });
-        }
         
         setChartData(prev => {
           const historical = prev.slice(-24);
+          const predicted = [];
+          for (let i = 0; i < 5; i++) {
+            const predTime = new Date(now.getTime() + (i + 1) * 60 * 60 * 1000);
+            predicted.push({
+              time: predTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              historicalPrice: null,
+              predictedPrice: data.predictions[i]
+            });
+          }
           return [...historical, ...predicted];
         });
       }
@@ -97,9 +96,9 @@ export function PredictionChart({
     }
   };
 
-  const historicalData = chartData.filter(d => d.type === 'historical');
-  const predictedData = chartData.filter(d => d.type === 'predicted');
   const trendColor = prediction?.trend === 'bullish' ? '#00d4aa' : prediction?.trend === 'bearish' ? '#ff4757' : '#f7931a';
+
+  const hasPredictions = chartData.some(d => d.predictedPrice !== null);
 
   return (
     <div className="prediction-panel">
@@ -213,9 +212,9 @@ export function PredictionChart({
                 borderRadius: '8px',
                 color: '#e8e8ed'
               }}
-              formatter={(value, name, props) => {
-                const type = props.payload.type;
-                const label = type === 'historical' ? 'Historical' : 'Predicted';
+              formatter={(value, name) => {
+                if (value === null || value === undefined) return [null, null];
+                const label = name === 'historicalPrice' ? 'Historical' : 'Predicted';
                 return [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, label];
               }}
               labelFormatter={(label) => label}
@@ -224,24 +223,24 @@ export function PredictionChart({
             />
             <Area 
               type="monotone" 
-              dataKey="price" 
-              data={historicalData}
+              dataKey="historicalPrice" 
               stroke="#f7931a" 
               strokeWidth={2}
               fill="url(#predGradient)"
               dot={false}
+              connectNulls
               activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
               isAnimationActive={false}
             />
-            {predictedData.length > 0 && (
+            {hasPredictions && (
               <Line 
                 type="monotone" 
-                dataKey="price" 
-                data={predictedData}
+                dataKey="predictedPrice" 
                 stroke={trendColor}
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
+                connectNulls
                 activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
                 isAnimationActive={false}
               />
