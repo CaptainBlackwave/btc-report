@@ -15,7 +15,7 @@ export async function GET() {
       );
     }
     
-    const result = await runBacktest(candles, { useLSTM: false, lookback: 24 });
+    const result = await runBacktest(candles, { lookback: 24 });
     
     return NextResponse.json({
       results: result.results.slice(-50),
