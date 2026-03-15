@@ -223,6 +223,7 @@ export function PredictionChart({
                 color: '#e8e8ed'
               }}
               formatter={(value) => [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'Price']}
+              isAnimationActive={false}
             />
             <Area 
               type="monotone" 
@@ -231,6 +232,8 @@ export function PredictionChart({
               strokeWidth={2}
               fill="url(#predGradient)"
               connectNulls
+              dot={false}
+              activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
             />
             {chartData.filter(d => d.type === 'predicted').length > 0 && (
               <Line 
@@ -240,8 +243,9 @@ export function PredictionChart({
                 stroke={trendColor}
                 strokeWidth={2}
                 strokeDasharray="5 5"
-                dot={{ fill: trendColor, r: 4 }}
+                dot={false}
                 connectNulls
+                activeDot={{ r: 6, fill: trendColor, stroke: '#fff', strokeWidth: 2 }}
               />
             )}
           </ComposedChart>

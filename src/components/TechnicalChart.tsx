@@ -134,6 +134,7 @@ export function TechnicalChart({ chartData: externalChartData }: TechnicalChartP
                     color: '#e8e8ed'
                   }}
                   labelStyle={{ color: '#8b8b9a' }}
+                  isAnimationActive={false}
                 />
                 <Legend />
 

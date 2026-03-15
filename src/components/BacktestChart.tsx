@@ -151,6 +151,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
                 color: '#e8e8ed'
               }}
               formatter={(value) => [`$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, '']}
+              isAnimationActive={false}
             />
             <Legend 
               wrapperStyle={{ paddingTop: '10px' }}
@@ -166,6 +167,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
               stroke="#f7931a" 
               strokeWidth={2}
               dot={false}
+              activeDot={{ r: 6, fill: '#f7931a', stroke: '#fff', strokeWidth: 2 }}
               name="actualPrice"
             />
             <Line 
@@ -175,6 +177,7 @@ export function BacktestChart({ compact = false }: BacktestChartProps) {
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
+              activeDot={{ r: 6, fill: '#00d4aa', stroke: '#fff', strokeWidth: 2 }}
               name="predictedPrice"
             />
           </LineChart>
