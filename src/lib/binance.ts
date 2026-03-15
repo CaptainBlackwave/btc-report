@@ -75,6 +75,35 @@ export async function fetchMarketData(symbol: string = 'BTCUSDT'): Promise<Marke
   };
 }
 
+export type TimeFrame = '15m' | '1h' | '4h' | '1d';
+
+export const TIMEFRAMES: TimeFrame[] = ['15m', '1h', '4h', '1d'];
+
+export interface MultiTimeframeData {
+  '15m': Candle[];
+  '1h': Candle[];
+  '4h': Candle[];
+  '1d': Candle[];
+}
+
+export async function fetchMultiTimeframeData(
+  symbol: string = 'BTCUSDT',
+  intervals: TimeFrame[] = TIMEFRAMES,
+  limit: number = 500
+): Promise<MultiTimeframeData> {
+  const promises = intervals.map(async (interval) => {
+    const candles = await fetchCandles(symbol, interval, limit);
+    return { interval, candles };
+  });
+
+  const results = await Promise.all(promises);
+  
+  return results.reduce((acc, { interval, candles }) => {
+    acc[interval] = candles;
+    return acc;
+  }, {} as MultiTimeframeData);
+}
+
 export function calculatePriceReturns(candles: Candle[], periods: number[] = [1, 6, 24]): number[] {
   const closes = candles.map(c => c.close);
   const returns: number[] = [];

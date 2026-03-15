@@ -25,35 +25,29 @@ interface PredictionData {
   };
 }
 
+import { IndicatorChartData } from '@/lib/indicators';
+
 interface PredictionChartProps {
   onPredict: () => void;
   onPredictComplete: () => void;
   isLoading: boolean;
+  chartData?: IndicatorChartData[];
 }
 
-export function PredictionChart({ onPredict, onPredictComplete, isLoading }: PredictionChartProps) {
+export function PredictionChart({ onPredict, onPredictComplete, isLoading, chartData: externalChartData }: PredictionChartProps) {
   const [prediction, setPrediction] = useState<PredictionData | null>(null);
   const [chartData, setChartData] = useState<{ time: string; price: number; type: 'historical' | 'predicted' }[]>([]);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch('/api/indicators');
-        if (res.ok) {
-          const data = await res.json();
-          const historical = data.chartData?.slice(-48).map((c: { time: number; close: number }) => ({
-            time: new Date(c.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            price: c.close,
-            type: 'historical' as const
-          })) || [];
-          setChartData(historical);
-        }
-      } catch (err) {
-        console.error('Failed to fetch history:', err);
-      }
-    };
-    fetchHistory();
-  }, []);
+    if (externalChartData && externalChartData.length > 0) {
+      const historical = externalChartData.slice(-48).map((c) => ({
+        time: new Date(c.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        price: c.close,
+        type: 'historical' as const
+      }));
+      setChartData(historical);
+    }
+  }, [externalChartData]);
 
   const runPrediction = async () => {
     onPredict();

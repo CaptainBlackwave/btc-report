@@ -13,6 +13,8 @@ import {
   Bar
 } from 'recharts';
 
+import { IndicatorChartData } from '@/lib/indicators';
+
 interface ChartData {
   time: number;
   close: number;
@@ -25,7 +27,11 @@ interface ChartData {
   macdHistogram?: number;
 }
 
-export function TechnicalChart() {
+interface TechnicalChartProps {
+  chartData?: IndicatorChartData[];
+}
+
+export function TechnicalChart({ chartData: externalChartData }: TechnicalChartProps) {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSMA, setShowSMA] = useState(true);
@@ -33,21 +39,26 @@ export function TechnicalChart() {
   const [showMACD, setShowMACD] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('/api/indicators');
-        if (res.ok) {
-          const json = await res.json();
-          setData(json.chartData || []);
+    if (externalChartData && externalChartData.length > 0) {
+      setData(externalChartData);
+      setLoading(false);
+    } else {
+      const fetchData = async () => {
+        try {
+          const res = await fetch('/api/indicators');
+          if (res.ok) {
+            const json = await res.json();
+            setData(json.chartData || []);
+          }
+        } catch (err) {
+          console.error('Failed to fetch chart data:', err);
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error('Failed to fetch chart data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+      };
+      fetchData();
+    }
+  }, [externalChartData]);
 
   const chartData = data.slice(-100).map(d => ({
     time: new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
