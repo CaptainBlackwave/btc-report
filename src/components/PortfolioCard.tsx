@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore, useMemo, useEffect } from 'react';
 import { usePortfolio } from '@/lib/PortfolioContext';
+import { calculateRiskMetrics, getRiskGrade, RiskMetrics } from '@/lib/risk';
+import { RiskRewardHeatmap } from '@/components/RiskRewardHeatmap';
 
 function useHydrated() {
   return useSyncExternalStore(
@@ -29,6 +31,58 @@ export function PortfolioCard() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [showHistory, setShowHistory] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<number[]>([]);
+  const [currentTime] = useState(() => Date.now());
+
+  useEffect(() => {
+    const fetchPriceHistory = async () => {
+      try {
+        const res = await fetch('/api/multi-timeframe?timeframe=1h');
+        const data = await res.json();
+        if (data.candles) {
+          setPriceHistory(data.candles.map((c: { close: number }) => c.close));
+        }
+      } catch (err) {
+        console.error('Failed to fetch price history:', err);
+      }
+    };
+    fetchPriceHistory();
+  }, []);
+
+  const riskMetrics: RiskMetrics | null = useMemo(() => {
+    if (portfolio.tradeHistory.length < 2 || priceHistory.length < 2) {
+      return null;
+    }
+
+    const trades = portfolio.tradeHistory.map(t => ({
+      entryPrice: t.price,
+      exitPrice: currentPrice,
+      entryTime: t.timestamp,
+      exitTime: currentTime,
+      quantity: t.amount,
+      side: t.type === 'buy' ? 'long' as const : 'short' as const,
+      pnl: t.type === 'buy' 
+        ? (currentPrice - t.price) * t.amount 
+        : (t.price - currentPrice) * t.amount,
+      pnlPercent: t.type === 'buy'
+        ? ((currentPrice - t.price) / t.price) * 100
+        : ((t.price - currentPrice) / t.price) * 100
+    }));
+
+    return calculateRiskMetrics(trades, priceHistory);
+  }, [portfolio.tradeHistory, priceHistory, currentPrice, currentTime]);
+
+  const riskGrade = useMemo(() => {
+    if (!riskMetrics) return null;
+    return getRiskGrade(riskMetrics);
+  }, [riskMetrics]);
+
+  const predictedReturn = useMemo(() => {
+    if (!percentageReturn) return 0;
+    return percentageReturn / 100;
+  }, [percentageReturn]);
+
+  const currentVolatility = riskMetrics?.volatility || 50;
 
   const handleAmountChange = (value: string) => {
     setTradeAmount(value);
@@ -185,6 +239,84 @@ export function PortfolioCard() {
           <div className="no-trades">No trades yet</div>
         )}
       </div>
+
+      {portfolio.tradeHistory.length > 0 && riskMetrics && (
+        <div className="strategy-health-panel">
+          <div className="health-header">
+            <h4>Strategy Health</h4>
+            {riskGrade && (
+              <span className="health-grade" style={{ color: riskGrade.color }}>
+                Grade: {riskGrade.grade}
+              </span>
+            )}
+          </div>
+
+          {riskGrade && (
+            <div className="health-description">
+              {riskGrade.description}
+            </div>
+          )}
+
+          <div className="health-metrics">
+            <div className="health-metric">
+              <span className="metric-label">Sharpe Ratio</span>
+              <span className="metric-value" style={{ 
+                color: riskMetrics.sharpeRatio >= 1 ? '#00d4aa' : riskMetrics.sharpeRatio >= 0.5 ? '#f7931a' : '#ff4757' 
+              }}>
+                {riskMetrics.sharpeRatio.toFixed(2)}
+              </span>
+            </div>
+            <div className="health-metric">
+              <span className="metric-label">Sortino Ratio</span>
+              <span className="metric-value" style={{ 
+                color: riskMetrics.sortinoRatio >= 1.5 ? '#00d4aa' : riskMetrics.sortinoRatio >= 1 ? '#f7931a' : '#ff4757' 
+              }}>
+                {riskMetrics.sortinoRatio.toFixed(2)}
+              </span>
+            </div>
+            <div className="health-metric">
+              <span className="metric-label">Max Drawdown</span>
+              <span className="metric-value danger">
+                -{riskMetrics.maxDrawdownPercent.toFixed(1)}%
+              </span>
+            </div>
+            <div className="health-metric">
+              <span className="metric-label">Win Rate</span>
+              <span className="metric-value">
+                {riskMetrics.winRate.toFixed(0)}%
+              </span>
+            </div>
+            <div className="health-metric">
+              <span className="metric-label">Profit Factor</span>
+              <span className="metric-value">
+                {riskMetrics.profitFactor.toFixed(2)}
+              </span>
+            </div>
+            <div className="health-metric">
+              <span className="metric-label">Risk/Reward</span>
+              <span className="metric-value">
+                1:{riskMetrics.riskRewardRatio.toFixed(1)}
+              </span>
+            </div>
+          </div>
+
+          <RiskRewardHeatmap 
+            currentVolatility={currentVolatility}
+            predictedReturn={predictedReturn}
+          />
+        </div>
+      )}
+
+      {portfolio.tradeHistory.length === 0 && (
+        <div className="strategy-health-panel empty">
+          <div className="health-header">
+            <h4>Strategy Health</h4>
+          </div>
+          <div className="empty-health">
+            <p>Place trades to see risk metrics</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

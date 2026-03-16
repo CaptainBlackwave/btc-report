@@ -2167,3 +2167,171 @@ html, body {
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+.strategy-health-panel {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.strategy-health-panel.empty {
+  background: var(--bg-tertiary);
+  border: 1px dashed var(--border);
+}
+
+.health-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.health-header h4 {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.health-grade {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.health-description {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.health-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.health-metric {
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+}
+
+.health-metric .metric-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.health-metric .metric-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.health-metric .metric-value.danger {
+  color: var(--danger);
+}
+
+.empty-health {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.risk-heatmap {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.heatmap-header h4 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.heatmap-header .recommendation {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.heatmap-chart {
+  margin-bottom: 8px;
+}
+
+.heatmap-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+}
+
+.legend-color {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.legend-color.low-risk {
+  background: rgba(0, 212, 170, 0.7);
+}
+
+.legend-color.medium-risk {
+  background: rgba(247, 147, 26, 0.7);
+}
+
+.legend-color.high-risk {
+  background: rgba(255, 71, 87, 0.7);
+}
+
+.current-position {
+  text-align: center;
+}
+
+.position-marker {
+  display: inline-block;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--accent-primary);
+  border-radius: 4px;
+  padding: 4px 12px;
+}
+
+.marker-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+}
+
+.marker-values {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-primary);
+}
